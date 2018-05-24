@@ -2,11 +2,13 @@
 #include "SphereWorld.h"
 #include "PxInfo.h"
 
+//#define sin(x) sworld->sinSW(x)
+//#define cos(x) sworld->cosSW(x)
+
 FisheyeRetriever::FisheyeRetriever(double a, double comp) {
 	compression = comp;
 	aperture = a;
 	accessTable = nullptr;
-	rotation = genRotMat(Vec3d(0, 0, 0));
 }
 void FisheyeRetriever::invalidateMaths() {
 	width = aperture * sworld->getRadius() * compression;

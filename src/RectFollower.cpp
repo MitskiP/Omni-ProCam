@@ -115,7 +115,10 @@ high_resolution_clock::time_point a1 = high_resolution_clock::now();
 	er->invalidateMaths();
 high_resolution_clock::time_point a2 = high_resolution_clock::now();
 cout << "elapsed " << ((duration<double, std::milli>)(a2-a1)).count() << endl;
+a1 = high_resolution_clock::now();
 	fr->invalidateMaths();
+a2 = high_resolution_clock::now();
+cout << "elapsed " << ((duration<double, std::milli>)(a2-a1)).count() << endl;
 #ifdef DEBUG
 exit(0);
 #endif
@@ -178,7 +181,7 @@ exit(0);
 
 		imshow("orig", tmp1);
 		imshow("converted", tmp2);
-		//imshow("fish", tmp3);
+		imshow("fish", tmp3);
 		//imshow("orig", *frame);
 		//imshow("converted", *equi);
 

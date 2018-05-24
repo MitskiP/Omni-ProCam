@@ -18,6 +18,7 @@ void WorldRetriever::deleteAccessTable() {
 }
 void WorldRetriever::connect(SphereWorld *sw) {
 	sworld = sw;
+	rotation = genRotMat(Vec3d(0, 0, 0));
 }
 shared_ptr<Mat> WorldRetriever::getFrame() {
 	shared_ptr<Mat> mat = make_shared<Mat>(height, width, DEFINED_CV_TYPE);
@@ -48,7 +49,10 @@ Point2d WorldRetriever::rotateCoordinateArray(double longitude, double latitude,
 }
 Mat WorldRetriever::genRotMat(Vec3d theta) {
 	// x - default axis; y - vertical axis; z - depth axis
-	
+
+	// ATTENTION: do not use fast sin/cos here - rotation matrices might lose their properties otherwise!!
+	//            something like norm(v') != norm(v) after v'=M*v
+
 	// Calculate rotation about x axis
 	Mat R_x = (Mat_<double>(3,3) <<
 			   1,		0,			  0,

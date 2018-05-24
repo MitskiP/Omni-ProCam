@@ -7,7 +7,6 @@ EquirectRetriever::EquirectRetriever(double h, double v, double comp) {
 	hangle = h;
 	vangle = v;
 	accessTable = nullptr;
-	rotation = genRotMat(Vec3d(0, 0, 0));
 }
 void EquirectRetriever::invalidateMaths() {
 	// http://paulbourke.net/dome/dualfish2sphere/

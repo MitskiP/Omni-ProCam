@@ -19,7 +19,7 @@ void SphereWorld::generateTrigonometryTable() {
 	sinTable = new double[max*3];
 	for (int i = 0; i < max*3; i++) {
 		int x = i - max;
-		sinTable[i] = sin(x * CV_PI / max);		// sin(t), t \in [-CV_PI; CV_PI*2]
+		sinTable[i] = sin(x * CV_PI / max);		// sin(t), t \in [-*CV_PI; CV_PI*2]
 	}
 	sinTableCenter = sinTable + max;			// points to sin(0)
 	cosTableCenter = sinTable + max + max/2;	// points to cos(0)

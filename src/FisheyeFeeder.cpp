@@ -1,4 +1,5 @@
 #include "FisheyeFeeder.h"
+
 #define sin(x) sworld->sinSW(x)
 #define cos(x) sworld->cosSW(x)
 
