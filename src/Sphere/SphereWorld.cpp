@@ -3,7 +3,7 @@
 #include "PxInfo.h"
 #include "WorldFeeder.h"
 
-SphereWorld::SphereWorld(int r) {
+SphereWorld::SphereWorld(double r) {
 	radius = r;
 	feeders = vector<WorldFeeder*>();
 	df = new DumbFeeder();

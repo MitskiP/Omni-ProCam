@@ -4,6 +4,7 @@ LD = g++
 SRCDIR = src
 BINDIR = bin
 OBJDIR = obj
+SPHEREOBJ = $(OBJDIR)/Sphere
 
 LIBS   = `pkg-config opencv --cflags --libs` -lpthread
 CFLAGS  += -Wall -Wextra -pedantic -Wno-unused-parameter -c $(LIBS)
@@ -17,22 +18,28 @@ CFLAGS += -O3 -flto -DRELEASE
 LDFLAGS += -O3 -flto -DRELEASE
 endif
 
-SOURCES = $(wildcard $(SRCDIR)/*.cpp)
-HEADERS = $(wildcard $(SRCDIR)/*.h)
+SOURCES = $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(SRCDIR)/*/*.cpp)
+HEADERS = $(wildcard $(SRCDIR)/*.h) $(wildcard $(SRCDIR)/*/*.h)
 OBJECTS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
 
 EXECUTABLE = RectFollower
 TARGET = $(BINDIR)/$(EXECUTABLE)
 
-all: $(SOURCES) $(TARGET)
+EXECUTABLE2 = BoardTracker
+TARGET2 = $(BINDIR)/$(EXECUTABLE2)
 
-$(TARGET): $(OBJECTS) | $(BINDIR)
+all: $(SOURCES) $(TARGET) $(TARGET2)
+
+$(TARGET): $(filter-out obj/$(EXECUTABLE2).o,$(OBJECTS)) | $(BINDIR)
 	$(CC) $(LDFLAGS) $^ -o $@
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
+$(TARGET2): $(filter-out obj/$(EXECUTABLE).o,$(OBJECTS)) | $(BINDIR)
+	$(CC) $(LDFLAGS) $^ -o $@
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR) $(SPHEREOBJ)
 	$(CC) $(CFLAGS) -o $@ $<
 
-$(BINDIR) $(OBJDIR):
+$(BINDIR) $(OBJDIR) $(SPHEREOBJ):
 	mkdir -p $@
 
 module = uvcvideo

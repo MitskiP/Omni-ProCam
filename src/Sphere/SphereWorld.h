@@ -24,7 +24,7 @@ private:
 
 public:
 
-	SphereWorld(int);
+	SphereWorld(double);
 	~SphereWorld();
 	void generateTrigonometryTable();
 	double sinSW(double);

@@ -18,7 +18,7 @@ protected:
 	SphereWorld *sworld;
 
 public:
-	shared_ptr<Mat> frame;
+	Mat frame;
 
 	WorldFeeder();
 	virtual ~WorldFeeder();
@@ -29,5 +29,5 @@ public:
 
 	virtual Point locate(double, double) = 0;
 	
-	void updateFrame(shared_ptr<Mat> &f) { frame = f; }
+	void updateFrame(Mat &f) { frame = f; }
 };

@@ -15,7 +15,7 @@ Point FisheyeFeeder::locate(double longitude, double latitude) {
 	#ifndef DEGREE_90
 	double refx = anchor.x, refy = anchor.y;
 	double r = 2* acos(sin(refy) * sin(latitude) + cos(refy)*cos(latitude)*cos(longitude-refx)) / aperture;
-	double theta = -atan2(cos(latitude)*sin(longitude-refx), cos(refy)*sin(latitude) - sin(refy)*cos(latitude)*cos(longitude-refx)); // 'mirror' by *-1
+	double theta = atan2(cos(latitude)*sin(longitude-refx), cos(refy)*sin(latitude) - sin(refy)*cos(latitude)*cos(longitude-refx)); // 'mirror' by *-1
 	#else
 	// case: 90°
 	double r = 2*(CV_PI/2 + latitude) / aperture;

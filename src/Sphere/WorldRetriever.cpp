@@ -25,7 +25,7 @@ shared_ptr<Mat> WorldRetriever::getFrame() {
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			PxInfo *p = &(accessTable[y][x]);
-			mat->at<Vec3b>(y, x) = p->wf->frame->at<Vec3b>(p->p.y, p->p.x);
+			mat->at<Vec3b>(y, x) = p->wf->frame.at<Vec3b>(p->p.y, p->p.x);
 		}
 	}
 	postProcessFrame(mat);

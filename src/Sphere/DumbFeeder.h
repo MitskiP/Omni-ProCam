@@ -11,8 +11,8 @@ using namespace std;
 class DumbFeeder : public WorldFeeder {
 public:
 	DumbFeeder() {
-		shared_ptr<Mat> m = make_shared<Mat>(1, 1, DEFINED_CV_TYPE);
-		m->at<Vec3b>(0, 0) = Vec3b(0, 255, 0);
+		Mat m = Mat(1, 1, DEFINED_CV_TYPE);
+		m.at<Vec3b>(0, 0) = Vec3b(0, 255, 0);
 		updateFrame(m);
 	}
 	void invalidateMaths() { }
