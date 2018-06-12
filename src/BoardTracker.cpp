@@ -111,7 +111,6 @@ int main(int argc, char** argv) {
 
 	int w = cap.get(CAP_PROP_FRAME_WIDTH);
 	int h = cap.get(CAP_PROP_FRAME_HEIGHT);
-	double camRadius = w / CV_PI;
 
 	cout << w << ", " << h << endl;
 
@@ -128,12 +127,66 @@ int main(int argc, char** argv) {
 	// start camera thread
     thread t1(cameraThread);
 
+
+
+
+
+
+	// pattern configuration
+	double realBlobRadius = 3.105/2; // cm
+	Size patternsize(2, 5); //number of centers
 	// cut out about 170-180 degree out of 235
 	double sourceAperture = 235 * CV_PI/180;
-	double targetAperture = 170 * CV_PI/180;
+	double targetAperture = 160 * CV_PI/180;
 	// projector position relative to camera. in cm.
-	Vec3d projPos(0, 0, 20);
+	//Vec3d projPos(0, 0, 20);
+	//Vec3d projPos(0, 0, 19);
+	Vec3d projPos(0, -7.49213, 18.5437);
+	double projectorAngularCorrectionStep = 1*CV_PI/180;
+	bool debug180 = true;
 	
+	double camRadius = w / sourceAperture;
+
+
+	SimpleBlobDetector::Params params;
+	//*// https://www.learnopencv.com/blob-detection-using-opencv-python-c/
+	// Change thresholds
+//	params.minThreshold = 80;
+//	params.maxThreshold = 200;
+	// Filter by Area.
+//	params.filterByArea = true;
+//	params.minArea = 32;
+//	params.maxArea = 2500;
+	// Filter by Circularity
+	params.filterByCircularity = true;
+	params.minCircularity = 0.7; // 0.785 = square
+	// Filter by Convexity
+//	params.filterByConvexity = true;
+//	params.minConvexity = 0.87;
+	// Filter by Inertia
+//	params.filterByInertia = false;
+//	params.minInertiaRatio = 0.01;//*/
+	CirclesGridFinderParameters cgparams;
+	/*cgparams.minDensity = 10;
+	cgparams.densityNeighborhoodSize = Size2f(16, 16);
+	cgparams.minDistanceToAddKeypoint = 20;
+	cgparams.kmeansAttempts = 100;
+	cgparams.convexHullFactor = 1.1f;
+	cgparams.keypointScale = 1;
+	cgparams.minGraphConfidence = 9;
+	cgparams.vertexGain = 1;
+	cgparams.vertexPenalty = -0.6f;
+	cgparams.edgeGain = 1;
+	cgparams.edgePenalty = -0.6f;
+	cgparams.existingVertexGain = 10000;
+	cgparams.minRNGEdgeSwitchDist = 5.f;
+	cgparams.gridType = CirclesGridFinderParameters::GridType::ASYMMETRIC_GRID;*/
+
+	BetterBlobDetector blobDetector(params);
+	Ptr<SimpleBlobDetector> simpleBlobDetector = SimpleBlobDetector::create(params);
+	vector<KeyPoint> blobs;
+
+	int lastFrameKey = -1;
 	//while (cap.isOpened() || frames.size() > 0) {
 	while (cap.isOpened()) {
 
@@ -156,69 +209,24 @@ int main(int argc, char** argv) {
 		duration<double, std::milli> frame_duration = p.time - last_frame_time;
 		last_frame_time = p.time;
 		
+
 		Rect roi;
 		roi.width = p.frame->cols * targetAperture / sourceAperture;
 		roi.height = p.frame->rows * targetAperture / sourceAperture;
 		roi.x = (p.frame->cols - roi.width) / 2;
 		roi.y = (p.frame->rows - roi.height) / 2;
-
 		Mat crop = (*p.frame)(roi);
 
-
-		//Size patternsize(4, 5); //number of centers
 		Mat gray; //source image
 		cvtColor(crop, gray, CV_BGR2GRAY);
 
-
-		vector<KeyPoint> blobs;
-		SimpleBlobDetector::Params params;
-/*		// https://www.learnopencv.com/blob-detection-using-opencv-python-c/
-		// Change thresholds
-		params.minThreshold = 80;
-		params.maxThreshold = 200;
-		// Filter by Area.
-		params.filterByArea = true;
-		params.minArea = 32;
-		params.maxArea = 2500;
-		// Filter by Circularity
-		params.filterByCircularity = true;
-		params.minCircularity = 0.7; // 0.785 = square
-		// Filter by Convexity
-		params.filterByConvexity = true;
-		params.minConvexity = 0.87;
-		// Filter by Inertia
-		params.filterByInertia = false;
-		params.minInertiaRatio = 0.01;*/
-
-
-		BetterBlobDetector blobDetector(params);
 		blobDetector.detect(gray, blobs);
 		vector< vector<Point> > blobContours = blobDetector.getContours();
 		for (size_t i = 0; i < blobContours.size(); i++)
 			drawContours(crop, blobContours, i, Scalar(255, 255, 0));
 
-		Ptr<SimpleBlobDetector> simpleBlobDetector = SimpleBlobDetector::create(params);
 		//simpleBlobDetector->detect(gray, blobs);
 		//drawKeypoints(crop, blobs, crop, Scalar(0,255,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-
-		Size patternsize(2, 5); //number of centers
-		CirclesGridFinderParameters cgparams;
-		/*cgparams.minDensity = 10;
-		cgparams.densityNeighborhoodSize = Size2f(16, 16);
-		cgparams.minDistanceToAddKeypoint = 20;
-		cgparams.kmeansAttempts = 100;
-		cgparams.convexHullFactor = 1.1f;
-		cgparams.keypointScale = 1;
-
-		cgparams.minGraphConfidence = 9;
-		cgparams.vertexGain = 1;
-		cgparams.vertexPenalty = -0.6f;
-		cgparams.edgeGain = 1;
-		cgparams.edgePenalty = -0.6f;
-		cgparams.existingVertexGain = 10000;
-
-		cgparams.minRNGEdgeSwitchDist = 5.f;
-		cgparams.gridType = CirclesGridFinderParameters::GridType::ASYMMETRIC_GRID;*/
 
 		vector<Point2f> centers; //this will be filled by the detected centers
 		bool patternfound = findCirclesGrid(gray, patternsize, centers, CALIB_CB_ASYMMETRIC_GRID | CALIB_CB_CLUSTERING, simpleBlobDetector, cgparams);
@@ -252,7 +260,6 @@ int main(int argc, char** argv) {
 
 			//drawKeypoints(out, blobs2, out, Scalar(0,255,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 			//drawKeypoints(crop, blobs2, crop, Scalar(0,255,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-			double realBlobRadius = 3.105/2; // cm
 			vector<double> distances(centers.size());
 			double avgDist = 0;
 			for (size_t i = 0; i < blobs2.size(); i++) {
@@ -268,7 +275,8 @@ int main(int argc, char** argv) {
 			double avgDistProj = 0;
 			for (size_t i = 0; i < centers.size(); i++) {
 				Point2d angles = pxToAngles(crop.rows, targetAperture, centers[i].x, centers[i].y);
-				Vec3d vec = anglesToVector(angles, distances[i]);
+				//Vec3d vec = anglesToVector(angles, distances[i]);
+				Vec3d vec = anglesToVector(angles, avgDist);
 				avgDistProj += norm(projPos - vec) / centers.size();
 				vec += -projPos;
 				angles = vectorToAngles(vec);
@@ -279,6 +287,8 @@ int main(int argc, char** argv) {
 			fillConvexPoly(out, pts2, 6, Scalar(0, 0, 255));
 		}
 		
+		if (debug180)
+			line(out, Point(out.cols/2, out.rows/2), Point(out.cols/2, out.rows), Scalar(0, 255, 0), 3);
 
 		Mat presentation;
 		resize(out, presentation, Size(768, 768));
@@ -315,27 +325,79 @@ int main(int argc, char** argv) {
 			sleep = 1;
 			is_first_frame = false;
 		} else if (sleep <= 0) {
-			printf("too many frames expected --------------------  %d ms\n", sleep);
+			//printf("too many frames expected --------------------  %d ms\n", sleep);
 			sleep = 1;
 		}
 		int val = waitKey(sleep);
 		if (val > 0) {
+			bool keyIsHeld = val == lastFrameKey;
 			printf("key = %d\n", val);
 			switch (val) {
+			case 'd':
+				debug180 = !debug180;
+				break;
 			case 82: // up
-				targetAperture += 1;
-				cout << "new target aperture size: " << targetAperture << endl;
+				targetAperture += (1+3*keyIsHeld)*CV_PI/180;
+				cout << "new target aperture size: " << targetAperture*180/CV_PI << endl;
 				break;
 			case 84: // down
-				targetAperture -= 1;
-				cout << "new target aperture size: " << targetAperture << endl;
+				targetAperture -= (1+3*keyIsHeld)*CV_PI/180;
+				cout << "new target aperture size: " << targetAperture*180/CV_PI << endl;
 				break;
-			case 27:  // esc
+			case 151: // numpad up w/o numlock
+			case 184: { // numpad up
+				Point2d angles = vectorToAngles(projPos);
+				angles.y += projectorAngularCorrectionStep + projectorAngularCorrectionStep*3*keyIsHeld;
+				projPos = anglesToVector(angles, norm(projPos));
+				cout << "new projector position: " << projPos << endl;
+				break;
+			}
+			case 157: // numpad center w/o numlock
+			case 153: // numpad down w/o numlock
+			case 181: // numpad center
+			case 178: { // numpad down
+				Point2d angles = vectorToAngles(projPos);
+				angles.y -= projectorAngularCorrectionStep + projectorAngularCorrectionStep*3*keyIsHeld;
+				projPos = anglesToVector(angles, norm(projPos));
+				cout << "new projector position: " << projPos << endl;
+				break;
+			} case 150:
+			case 180: { // numpad left
+				Point2d angles = vectorToAngles(projPos);
+				angles.x += projectorAngularCorrectionStep + projectorAngularCorrectionStep*3*keyIsHeld;
+				projPos = anglesToVector(angles, norm(projPos));
+				cout << "new projector position: " << projPos << endl;
+				break;
+			} case 152:
+			case 182: { // numpad right
+				Point2d angles = vectorToAngles(projPos);
+				angles.x -= projectorAngularCorrectionStep + projectorAngularCorrectionStep*3*keyIsHeld;
+				projPos = anglesToVector(angles, norm(projPos));
+				cout << "new projector position: " << projPos << endl;
+				break;
+			} case 171: { // numpad +
+				projPos += projPos / norm(projPos) * (0.1 + 0.1*3*keyIsHeld);
+				cout << "new projector position: " << projPos << endl;
+				break;
+			} case 173: { // numpad -
+				projPos -= projPos / norm(projPos) * (0.1 + 0.1*3*keyIsHeld);
+				cout << "new projector position: " << projPos << endl;
+				break;
+			} case 27:  // esc
 			case 'q':
 				cap.release();
 				break;
 			}
+			// force sleeping 1ms regardless of key press USING waitKey
+			// (required if we press and hold a key while forcing opencv to redraw imshow^^)
+			start_time = high_resolution_clock::now();
+			do {
+				waitKey(1);
+				end_time = high_resolution_clock::now();
+				time_span = end_time - start_time;
+			} while (time_span.count() < 1);
 		}
+		lastFrameKey = val;
 	}
 //video.release();
 	// the camera will be deinitialized automatically in VideoCapture destructor
