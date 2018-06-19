@@ -42,9 +42,8 @@ void cameraThread() {
 		shared_ptr<Mat> frame = make_shared<Mat>();
 		cap.read(*frame);
 		if (frame->empty())
-			cap.release();
-		else
-			frames.push_back(Page(frame, high_resolution_clock::now()));
+			break;
+		frames.push_back(Page(frame, high_resolution_clock::now()));
 		if (localFile)
 			this_thread::sleep_for(std::chrono::milliseconds(66));
 			//waitKey(66); // 66.66ms = 15 fps
@@ -106,6 +105,11 @@ int main(int argc, char** argv) {
 	if(!cap.isOpened())  // check if we succeeded
 		return -1;
 
+
+	Mat image = imread("frame1.png", CV_LOAD_IMAGE_COLOR);
+	Point2f imgPts[] = { Point2f(0, 0), Point2f(image.cols, 0), Point2f(0, image.rows), Point2f(image.cols, image.rows) };
+
+
 	cap.set(CAP_PROP_FRAME_HEIGHT, 1200);
 	cap.set(CAP_PROP_FRAME_WIDTH, 1200);
 
@@ -133,8 +137,9 @@ int main(int argc, char** argv) {
 
 
 	// pattern configuration
-	double realBlobRadius = 3.105/2; // cm
-	Size patternsize(2, 5); //number of centers
+	//double realBlobRadius = 3.105/2; // cm
+	double realBlobRadius = 3.969/2; // cm
+	Size patternsize(2, 2); //number of centers
 	// cut out about 170-180 degree out of 235
 	double sourceAperture = 235 * CV_PI/180;
 	double targetAperture = 160 * CV_PI/180;
@@ -154,8 +159,8 @@ int main(int argc, char** argv) {
 //	params.minThreshold = 80;
 //	params.maxThreshold = 200;
 	// Filter by Area.
-//	params.filterByArea = true;
-//	params.minArea = 32;
+	params.filterByArea = true;
+	params.minArea = 92;
 //	params.maxArea = 2500;
 	// Filter by Circularity
 	params.filterByCircularity = true;
@@ -164,7 +169,7 @@ int main(int argc, char** argv) {
 //	params.filterByConvexity = true;
 //	params.minConvexity = 0.87;
 	// Filter by Inertia
-//	params.filterByInertia = false;
+//	params.filterByInertia = true;
 //	params.minInertiaRatio = 0.01;//*/
 	CirclesGridFinderParameters cgparams;
 	/*cgparams.minDensity = 10;
@@ -229,16 +234,17 @@ int main(int argc, char** argv) {
 		//drawKeypoints(crop, blobs, crop, Scalar(0,255,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
 		vector<Point2f> centers; //this will be filled by the detected centers
-		bool patternfound = findCirclesGrid(gray, patternsize, centers, CALIB_CB_ASYMMETRIC_GRID | CALIB_CB_CLUSTERING, simpleBlobDetector, cgparams);
+		bool patternfound = findCirclesGrid(gray, patternsize, centers, CALIB_CB_SYMMETRIC_GRID | CALIB_CB_CLUSTERING, simpleBlobDetector, cgparams);
 
 		//Mat out(p.frame->rows, p.frame->cols, p.frame->type(), Scalar(0,0,0));
 		Mat out(crop.rows, crop.cols, crop.type(), Scalar(0, 0, 0));
 		drawChessboardCorners(out, patternsize, Mat(centers), patternfound);
 		drawChessboardCorners(crop, patternsize, Mat(centers), patternfound);
-		
+
 		if (patternfound) {
-			Point pts[] = { centers[0], centers[1], centers[3], centers[7], centers[9], centers[8] };
-			fillConvexPoly(out, pts, 6, Scalar(255, 0, 0));
+			//Point pts[] = { centers[0], centers[1], centers[3], centers[7], centers[9], centers[8] };
+			Point pts[] = { centers[0], centers[1], centers[3], centers[2] };
+			fillConvexPoly(out, pts, sizeof(pts)/sizeof(pts[0]), Scalar(255, 0, 0));
 
 			vector<KeyPoint> blobs2(centers.size());
 			vector<vector<Point>> blobContours2(centers.size());
@@ -283,10 +289,25 @@ int main(int argc, char** argv) {
 				centers[i] = anglesToPx(crop.rows, targetAperture, angles);
 			}
 			//cout << "dist: " << avgDist << " from proj: " << avgDistProj << endl;
-			Point pts2[] = { centers[0], centers[1], centers[3], centers[7], centers[9], centers[8] };
-			fillConvexPoly(out, pts2, 6, Scalar(0, 0, 255));
+			//Point pts2[] = { centers[0], centers[1], centers[3], centers[7], centers[9], centers[8] };
+			Point pts2[] = { centers[0], centers[1], centers[3], centers[2] };
+			fillConvexPoly(out, pts2, sizeof(pts2)/sizeof(pts2[0]), Scalar(0, 0, 255));
+			
+			//Point2f pts3a[] = { centers[0], centers[1], centers[2], centers[3] }; // vertical
+			Point2f pts3a[] = { centers[3], centers[2], centers[1], centers[0] }; // vertical
+			Point2f pts3b[] = { centers[1], centers[3], centers[0], centers[2] }; // horizontal
+			float dx = norm(centers[0] - centers[1]);
+			float dy = norm(centers[0] - centers[2]);
+			dx = max(dx, -dx);
+			dy = max(dy, -dy);
+			Mat perspTrans;
+			if (dx > dy) // horizontal
+				perspTrans = getPerspectiveTransform(imgPts, pts3b);
+			else // vertical
+				perspTrans = getPerspectiveTransform(imgPts, pts3a);
+			warpPerspective(image, out, perspTrans, Size(out.cols, out.rows));
 		}
-		
+
 		if (debug180)
 			line(out, Point(out.cols/2, out.rows/2), Point(out.cols/2, out.rows), Scalar(0, 255, 0), 3);
 

@@ -1,4 +1,4 @@
-CC=g++
+CC = g++
 LD = g++
 
 SRCDIR = src
@@ -7,7 +7,7 @@ OBJDIR = obj
 SPHEREOBJ = $(OBJDIR)/Sphere
 
 LIBS   = `pkg-config opencv --cflags --libs` -lpthread
-CFLAGS  += -Wall -Wextra -pedantic -Wno-unused-parameter -c $(LIBS)
+CFLAGS  += -Wall -Wextra -pedantic -Wno-unused-parameter -std=c++11 -c $(LIBS)
 LDFLAGS += $(LIBS)
 
 ifeq ($(DEBUG),1)
