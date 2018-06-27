@@ -10,13 +10,9 @@
 
 #include "SharedQueue.h"
 #include "SharedVideoCapture.h"
-#include "Sphere/SphereWorld.h"
-#include "Sphere/FisheyeFeeder.h"
-#include "Sphere/EquirectRetriever.h"
-#include "Sphere/FisheyeRetriever.h"
-#include "MarkerTracker.h"
 #include "BetterBlobDetector.h"
 
+#define RGB_TYPE CV_8UC3
 
 using namespace cv;
 using namespace std;
@@ -120,7 +116,7 @@ int main(int argc, char** argv) {
 
 	cout << w << ", " << h << endl;
 
-	Mat border = Mat(768, 128, DEFINED_CV_TYPE, Scalar(0, 0, 0));
+	Mat border = Mat(768, 128, RGB_TYPE, Scalar(0, 0, 0));
 
 	// prepare required variables for the main loop
 	bool is_first_frame = true;
