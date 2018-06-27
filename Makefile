@@ -11,8 +11,8 @@ CFLAGS  += -Wall -Wextra -pedantic -Wno-unused-parameter -std=c++11 -c $(LIBS)
 LDFLAGS += $(LIBS)
 
 ifeq ($(DEBUG),1)
-CFLAGS += -O0 -no-pie -g -pg -DDEBUG
-LDFLAGS += -O0 -no-pie -g -pg -DDEBUG
+CFLAGS += -O0 -no-pie -g -pg -DDEBUG -D_DEBUG
+LDFLAGS += -O0 -no-pie -g -pg -DDEBUG -D_DEBUG
 else
 CFLAGS += -O3 -flto -DRELEASE
 LDFLAGS += -O3 -flto -DRELEASE

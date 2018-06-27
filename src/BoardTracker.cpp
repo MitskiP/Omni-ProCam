@@ -107,7 +107,9 @@ int main(int argc, char** argv) {
 
 
 	Mat image = imread("frame1.png", CV_LOAD_IMAGE_COLOR);
-	Point2f imgPts[] = { Point2f(0, 0), Point2f(image.cols, 0), Point2f(0, image.rows), Point2f(image.cols, image.rows) };
+	//Point2f imgPts[] = { Point2f(0, 0), Point2f(image.cols, 0), Point2f(0, image.rows), Point2f(image.cols, image.rows) };
+	float imgDelta = 19.613f + 39.687f / 2;
+	Point2f imgPts[] = { Point2f(imgDelta, imgDelta), Point2f(image.cols-imgDelta, 0), Point2f(0, image.rows-imgDelta), Point2f(image.cols-imgDelta, image.rows-imgDelta) };
 
 
 	cap.set(CAP_PROP_FRAME_HEIGHT, 1200);
@@ -129,7 +131,7 @@ int main(int argc, char** argv) {
 	high_resolution_clock::time_point last_frame_time = high_resolution_clock::now();
 
 	// start camera thread
-    thread t1(cameraThread);
+	thread t1(cameraThread);
 
 
 
@@ -142,7 +144,7 @@ int main(int argc, char** argv) {
 	Size patternsize(2, 2); //number of centers
 	// cut out about 170-180 degree out of 235
 	double sourceAperture = 235 * CV_PI/180;
-	double targetAperture = 160 * CV_PI/180;
+	double targetAperture = 148 * CV_PI/180;
 	// projector position relative to camera. in cm.
 	//Vec3d projPos(0, 0, 20);
 	//Vec3d projPos(0, 0, 19);
@@ -293,8 +295,8 @@ int main(int argc, char** argv) {
 			Point pts2[] = { centers[0], centers[1], centers[3], centers[2] };
 			fillConvexPoly(out, pts2, sizeof(pts2)/sizeof(pts2[0]), Scalar(0, 0, 255));
 			
-			//Point2f pts3a[] = { centers[0], centers[1], centers[2], centers[3] }; // vertical
-			Point2f pts3a[] = { centers[3], centers[2], centers[1], centers[0] }; // vertical
+			Point2f pts3a[] = { centers[0], centers[1], centers[2], centers[3] }; // vertical
+			//Point2f pts3a[] = { centers[3], centers[2], centers[1], centers[0] }; // vertical
 			Point2f pts3b[] = { centers[1], centers[3], centers[0], centers[2] }; // horizontal
 			float dx = norm(centers[0] - centers[1]);
 			float dy = norm(centers[0] - centers[2]);
@@ -305,7 +307,25 @@ int main(int argc, char** argv) {
 				perspTrans = getPerspectiveTransform(imgPts, pts3b);
 			else // vertical
 				perspTrans = getPerspectiveTransform(imgPts, pts3a);
+			
+			#ifdef DEBUG
+			Mat warp;
+			warpPerspective(image, warp, perspTrans, Size(out.cols, out.rows));
+			int numberOfPixels = warp.rows * warp.cols;
+			int ch = warp.channels();
+			CV_DbgAssert(ch == 3);
+			uchar* fptr = reinterpret_cast<uchar*>(warp.data);
+			uchar* optr = reinterpret_cast<uchar*>(out.data);
+			for (int i = 0; i < numberOfPixels; i++, fptr+=ch, optr+=ch) {
+				if ((fptr[0] | fptr[1] | fptr[2]) > 0) {
+					optr[0] = fptr[0];
+					optr[1] = fptr[1];
+					optr[2] = fptr[2];
+				}
+			}
+			#else
 			warpPerspective(image, out, perspTrans, Size(out.cols, out.rows));
+			#endif
 		}
 
 		if (debug180)
