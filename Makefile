@@ -24,9 +24,15 @@ OBJECTS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
 EXECUTABLE = BoardTracker
 TARGET = $(BINDIR)/$(EXECUTABLE)
 
+EXECUTABLE2 = aruco
+TARGET2 = $(BINDIR)/$(EXECUTABLE2)
+
 all: $(SOURCES) $(TARGET) $(TARGET2)
 
-$(TARGET): $(OBJECTS) | $(BINDIR)
+$(TARGET): $(filter-out obj/$(EXECUTABLE2).o,$(OBJECTS)) | $(BINDIR)
+	$(CC) $(LDFLAGS) $^ -o $@
+
+$(TARGET2): $(filter-out obj/$(EXECUTABLE).o,$(OBJECTS)) | $(BINDIR)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)

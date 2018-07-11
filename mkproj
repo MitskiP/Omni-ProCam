@@ -1,4 +1,9 @@
 #!/bin/bash
 xrandr --auto
+echo "xrandr auto done"
 sleep 1
 xrandr --output HDMI1 --right-of eDP1
+echo "HDMI1 right-of eDP1 done"
+sleep 1
+xrandr --output HDMI1 --mode 1400x1050
+echo "HDMI1 mode set done"
