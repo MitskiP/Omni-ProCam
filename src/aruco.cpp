@@ -47,8 +47,8 @@ int main(int argc, char **argv) {
 	// set dictionary to detect and setup sheets
 	Ptr<Dictionary> dictionary = getPredefinedDictionary(DICT_4X4_250);
 	vector<Sheet> sheets;
-	sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "frame.png"));
-	sheets.push_back(Sheet(1, Size2f(29.7, 21), 8.8, Point2f(0.9, 0.9), Point2f(8.8+0.9, 8.8+0.9), Point2f(29.7, 21), "frame.png"));
+	sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "frame.png", false, 1));
+	sheets.push_back(Sheet(1, Size2f(29.7, 21), 8.8, Point2f(0.9, 0.9), Point2f(8.8+0.9, 8.8+0.9), Point2f(29.7, 21), "penguin.mp4", false, 2));
 	//sheets.push_back(Sheet(3, Size2f(29.7, 21), 4.4, Point2f(5.3, 5.3), Point2f(29.7, 21)));
 	
 	// read camera parameters
@@ -210,16 +210,17 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 				Point2f imgPts[] = { Point2f(0, 0), Point2f(content.cols, 0), Point2f(0, content.rows), Point2f(content.cols, content.rows) };
 				Mat perspTrans = getPerspectiveTransform(imgPts, pts3);
 				Mat warp;
-#ifndef DBG_CONTENT
+	#ifndef DBG_CONTENT
 				warpPerspective(content, image, perspTrans, Size(image.cols, image.rows));
-#else
+				warpPerspective(content, out, perspTrans, Size(image.cols, image.rows));
+	#else
 				warpPerspective(content, warp, perspTrans, Size(image.cols, image.rows));
 				int numberOfPixels = warp.rows * warp.cols;
 				int ch = warp.channels();
 				uchar* fptr = reinterpret_cast<uchar*>(warp.data);
 				uchar* optr = reinterpret_cast<uchar*>(image.data);
 				uchar* optr2 = reinterpret_cast<uchar*>(out.data);
-				for (int i = 0; i < numberOfPixels; i++, fptr+=ch, optr+=ch) {
+				for (int i = 0; i < numberOfPixels; i++, fptr+=ch, optr+=ch, optr2+=ch) {
 					if ((fptr[0] | fptr[1] | fptr[2]) > 0) {
 						optr[0] = fptr[0];
 						optr[1] = fptr[1];
@@ -229,7 +230,7 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 						optr2[2] = fptr[2];
 					}
 				}
-#endif
+	#endif
 #else
 				// draw corrected corners
 				Point pts2[] = { cornersO[k][0], cornersO[k][1], cornersO[k][2], cornersO[k][3] };

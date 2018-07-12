@@ -4,7 +4,7 @@
 
 class Sheet {
 public:
-	Sheet(int, Size2f, float, Point2f, Point2f, Point2f, string);
+	Sheet(int, Size2f, float, Point2f, Point2f, Point2f, string, bool, int);
 	~Sheet();
 	int id;
 	Size2f dim;
@@ -15,6 +15,8 @@ public:
 	string mediaFile;
 	VideoCapture media;
 	Mat nextFrame();
+	bool transp;
+	int frameSteps;
 private:
 	void resetMedia();
 };
@@ -22,23 +24,29 @@ Sheet::~Sheet() {
 	if (media.isOpened())
 		media.release();
 }
-Sheet::Sheet(int a, Size2f b, float c, Point2f d, Point2f e, Point2f f, string z) {
+Sheet::Sheet(int a, Size2f b, float c, Point2f d, Point2f e, Point2f f, string y, bool z, int x) {
 	id = a; dim = b; mSize = c; mPos = d; tl = e; br = f;
 	tl -= mPos;
 	br -= mPos;
 	tl = tl / mSize;
 	br = br / mSize;
 	
-	mediaFile = z;
+	frameSteps = x;
+	transp = z;
+	mediaFile = y;
 	resetMedia();
 }
 Mat Sheet::nextFrame() {
 	Mat res;
-	media >> res;
+	for (int i = 0; i < frameSteps; i++)
+		media >> res;
 	while (res.empty()) {
 		resetMedia();
 		media >> res;
 	}
+	flip(res, res, 1);
+	if (transp)
+		transpose(res, res);
 	return res;
 }
 void Sheet::resetMedia() {
