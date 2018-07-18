@@ -48,7 +48,8 @@ int main(int argc, char **argv) {
 	Ptr<Dictionary> dictionary = getPredefinedDictionary(DICT_4X4_250);
 	vector<Sheet> sheets;
 	sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "frame.png", false, 1));
-	sheets.push_back(Sheet(1, Size2f(29.7, 21), 8.8, Point2f(0.9, 0.9), Point2f(8.8+0.9, 8.8+0.9), Point2f(29.7, 21), "penguin.mp4", false, 2));
+	//sheets.push_back(Sheet(1, Size2f(29.7, 21), 8.8, Point2f(0.9, 0.9), Point2f(8.8+0.9, 8.8+0.9), Point2f(29.7, 21), "penguin.mp4", false, 2));
+	sheets.push_back(Sheet(1, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "penguin.mp4", false, 2));
 	//sheets.push_back(Sheet(3, Size2f(29.7, 21), 4.4, Point2f(5.3, 5.3), Point2f(29.7, 21)));
 	
 	// read camera parameters
@@ -160,7 +161,7 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 			for (size_t m = 0; m < idsO.size(); m++) {
 				Point pts[] = { cornersO[m][0], cornersO[m][1], cornersO[m][2], cornersO[m][3] };
 				fillConvexPoly(image, pts, sizeof(pts)/sizeof(pts[0]), Scalar(0, 255, 255));
-				fillConvexPoly(out, pts, sizeof(pts)/sizeof(pts[0]), Scalar(255, 0, 0));
+				//fillConvexPoly(out, pts, sizeof(pts)/sizeof(pts[0]), Scalar(0, 255, 255));
 //circle(image, cornersO[m][0], 10, Scalar(0, 0, 255), -1);
 			}
 			// correct marker corners position according to camera/projector position difference
@@ -175,7 +176,7 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 				distances[k] = norm(tvecs[k]) * sheets[sheetID[k]].mSize;
 				cout << distances[k] << endl;
 				
-				// 0 3
+/*				// 0 3
 				// 1 2
 				// calculate effective drawing durface
 				Point2f hdiff = (cornersO[k][3] - cornersO[k][0] + cornersO[k][2] - cornersO[k][1]) / 2;
@@ -189,7 +190,7 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 				Point pts[] = { cornersO[k][0], cornersO[k][1], cornersO[k][2], cornersO[k][3] };
 				fillConvexPoly(image, pts, sizeof(pts)/sizeof(pts[0]), Scalar(255, 0, 0));
 				fillConvexPoly(out, pts, sizeof(pts)/sizeof(pts[0]), Scalar(255, 0, 0));
-				
+*/				
 				// apply correction to each corner
 				for (size_t i = 0; i < cornersO[k].size(); i++) {
 					Point2d angles = pxToAngles(image.rows, 235*CV_PI/180, cornersO[k][i].x, cornersO[k][i].y);
@@ -201,19 +202,25 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 					cornersO[k][i] = anglesToPx(image.rows, 235*CV_PI/180, angles);
 				}
 
-#define CONTENT
 #define DBG_CONTENT
-
-#ifdef CONTENT
-				Point2f pts3[] = { cornersO[k][0], cornersO[k][3], cornersO[k][1], cornersO[k][2] };
 				Mat content = sheets[sheetID[k]].nextFrame();
-				Point2f imgPts[] = { Point2f(0, 0), Point2f(content.cols, 0), Point2f(0, content.rows), Point2f(content.cols, content.rows) };
+
+				// calculate perspective matrix for marker
+				//Point2f pts3[] = { cornersO[k][0], cornersO[k][3], cornersO[k][1], cornersO[k][2] }; // target points
+				Point2f pts3[] = { cornersO[k][0], cornersO[k][1], cornersO[k][3], cornersO[k][2] }; // target points
+				float h = content.cols / (sheets[sheetID[k]].br.x - sheets[sheetID[k]].tl.x); // calculate pixels (on content) per marker size
+				float v = content.rows / (sheets[sheetID[k]].br.y - sheets[sheetID[k]].tl.y);
+				Point2f tl = Point2f( (0 - sheets[sheetID[k]].tl.x) * h, (0 - sheets[sheetID[k]].tl.y) * v);
+				Point2f br = Point2f( (1.0f - sheets[sheetID[k]].tl.x) * h, (1.0f - sheets[sheetID[k]].tl.y) * v);
+				Point2f tr = Point2f(br.x, tl.y);
+				Point2f bl = Point2f(tl.x, br.y);
+				Point2f imgPts[] = { tl, tr, bl, br }; // source points of marker according to content
 				Mat perspTrans = getPerspectiveTransform(imgPts, pts3);
 				Mat warp;
-	#ifndef DBG_CONTENT
+#ifndef DBG_CONTENT
 				warpPerspective(content, image, perspTrans, Size(image.cols, image.rows));
 				warpPerspective(content, out, perspTrans, Size(image.cols, image.rows));
-	#else
+#else
 				warpPerspective(content, warp, perspTrans, Size(image.cols, image.rows));
 				int numberOfPixels = warp.rows * warp.cols;
 				int ch = warp.channels();
@@ -230,12 +237,6 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 						optr2[2] = fptr[2];
 					}
 				}
-	#endif
-#else
-				// draw corrected corners
-				Point pts2[] = { cornersO[k][0], cornersO[k][1], cornersO[k][2], cornersO[k][3] };
-				fillConvexPoly(image, pts2, sizeof(pts2)/sizeof(pts2[0]), Scalar(0, 0, 255));
-				fillConvexPoly(out, pts2, sizeof(pts2)/sizeof(pts2[0]), Scalar(0, 0, 255));
 #endif
 			}
 		}
@@ -260,7 +261,7 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 		hconcat(presentation, border, presentation);
 
 		resize(image, image, Size(), 0.5, 0.5);
-		imshow("out", image);
+		imshow("floating", image);
 		imshow("Fullscreen ws5", presentation);
 
 /*

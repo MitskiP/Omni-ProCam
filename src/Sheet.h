@@ -44,7 +44,7 @@ Mat Sheet::nextFrame() {
 		resetMedia();
 		media >> res;
 	}
-	flip(res, res, 1);
+	//flip(res, res, 1);
 	if (transp)
 		transpose(res, res);
 	return res;
