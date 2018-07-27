@@ -15,8 +15,14 @@ public:
 	string mediaFile;
 	VideoCapture media;
 	Mat nextFrame();
+	Size getContentSize();
 	bool transp;
 	int frameSteps;
+
+	long updatedFrame;
+	Vec3d realWorld[4];
+	Point2d projection[4];
+	Mat perspTrans;
 private:
 	void resetMedia();
 };
@@ -30,6 +36,8 @@ Sheet::Sheet(int a, Size2f b, float c, Point2f d, Point2f e, Point2f f, string y
 	br -= mPos;
 	tl = tl / mSize;
 	br = br / mSize;
+	
+	updatedFrame = -99999999;
 	
 	frameSteps = x;
 	transp = z;
@@ -55,6 +63,9 @@ void Sheet::resetMedia() {
 		cerr << "invalid input: " << mediaFile << endl;
 		exit(32);
 	}
+}
+Size Sheet::getContentSize() {
+	return Size(media.get(CAP_PROP_FRAME_WIDTH), media.get(CAP_PROP_FRAME_HEIGHT));
 }
 
 //Sheet::~SharedQueue(){}

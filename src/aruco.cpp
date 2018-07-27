@@ -101,7 +101,7 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 
 	Mat image;
 	Mat border = Mat(OHEIGHT, OOFFSET, CV_8UC3, Scalar(0, 0, 0));
-	while (inputVideo.grab()) {
+	for (long frameNo = 0; inputVideo.grab(); frameNo++) {
 
 		inputVideo.retrieve(image);
 		Mat undistort;
@@ -194,51 +194,59 @@ Matx33f KnewLL = Matx33f(new_sizeLL.width/(CV_PI), 0, 0,
 				// apply correction to each corner
 				for (size_t i = 0; i < cornersO[k].size(); i++) {
 					Point2d angles = pxToAngles(image.rows, 235*CV_PI/180, cornersO[k][i].x, cornersO[k][i].y);
-					//Vec3d vec = anglesToVector(angles, distances[i]);
 					Vec3d vec = anglesToVector(angles, distances[k]);
-					//avgDistProj += norm(projPos - vec) / centers.size();
 					vec += -projPos;
 					angles = vectorToAngles(vec);
 					cornersO[k][i] = anglesToPx(image.rows, 235*CV_PI/180, angles);
+
+					sheets[sheetID[k]].realWorld[i] = vec;
+					sheets[sheetID[k]].projection[i] = cornersO[k][i];
+					sheets[sheetID[k]].updatedFrame = frameNo;
 				}
 
-#define DBG_CONTENT
-				Mat content = sheets[sheetID[k]].nextFrame();
-
 				// calculate perspective matrix for marker
-				//Point2f pts3[] = { cornersO[k][0], cornersO[k][3], cornersO[k][1], cornersO[k][2] }; // target points
 				Point2f pts3[] = { cornersO[k][0], cornersO[k][1], cornersO[k][3], cornersO[k][2] }; // target points
-				float h = content.cols / (sheets[sheetID[k]].br.x - sheets[sheetID[k]].tl.x); // calculate pixels (on content) per marker size
-				float v = content.rows / (sheets[sheetID[k]].br.y - sheets[sheetID[k]].tl.y);
+				//Point2f pts3[] = { sheets[sheetID[k]].projection[0], sheets[sheetID[k]].projection[1], sheets[sheetID[k]].projection[3], sheets[sheetID[k]].projection[2] }; // target points
+				Size content = sheets[sheetID[k]].getContentSize();
+				float h = content.width / (sheets[sheetID[k]].br.x - sheets[sheetID[k]].tl.x); // calculate pixels (on content) per marker size
+				float v = content.height / (sheets[sheetID[k]].br.y - sheets[sheetID[k]].tl.y);
 				Point2f tl = Point2f( (0 - sheets[sheetID[k]].tl.x) * h, (0 - sheets[sheetID[k]].tl.y) * v);
 				Point2f br = Point2f( (1.0f - sheets[sheetID[k]].tl.x) * h, (1.0f - sheets[sheetID[k]].tl.y) * v);
 				Point2f tr = Point2f(br.x, tl.y);
 				Point2f bl = Point2f(tl.x, br.y);
 				Point2f imgPts[] = { tl, tr, bl, br }; // source points of marker according to content
-				Mat perspTrans = getPerspectiveTransform(imgPts, pts3);
-				Mat warp;
-#ifndef DBG_CONTENT
-				warpPerspective(content, image, perspTrans, Size(image.cols, image.rows));
-				warpPerspective(content, out, perspTrans, Size(image.cols, image.rows));
-#else
-				warpPerspective(content, warp, perspTrans, Size(image.cols, image.rows));
-				int numberOfPixels = warp.rows * warp.cols;
-				int ch = warp.channels();
-				uchar* fptr = reinterpret_cast<uchar*>(warp.data);
-				uchar* optr = reinterpret_cast<uchar*>(image.data);
-				uchar* optr2 = reinterpret_cast<uchar*>(out.data);
-				for (int i = 0; i < numberOfPixels; i++, fptr+=ch, optr+=ch, optr2+=ch) {
-					if ((fptr[0] | fptr[1] | fptr[2]) > 0) {
-						optr[0] = fptr[0];
-						optr[1] = fptr[1];
-						optr[2] = fptr[2];
-						optr2[0] = fptr[0];
-						optr2[1] = fptr[1];
-						optr2[2] = fptr[2];
-					}
-				}
-#endif
+				sheets[sheetID[k]].perspTrans = getPerspectiveTransform(imgPts, pts3);
 			}
+		}
+
+		// draw tracked sheets
+#define DBG_CONTENT
+		for (size_t k = 0; k < sheets.size(); k++) {
+			if (frameNo - sheets[k].updatedFrame > 30) // ~15 fps
+				continue;
+			Mat content = sheets[k].nextFrame();
+			Mat warp;
+#ifndef DBG_CONTENT
+			warpPerspective(content, image, sheets[k].perspTrans, Size(image.cols, image.rows));
+			warpPerspective(content, out, sheets[k].perspTrans, Size(image.cols, image.rows));
+#else
+			warpPerspective(content, warp, sheets[k].perspTrans, Size(image.cols, image.rows));
+			int numberOfPixels = warp.rows * warp.cols;
+			int ch = warp.channels();
+			uchar* fptr = reinterpret_cast<uchar*>(warp.data);
+			uchar* optr = reinterpret_cast<uchar*>(image.data);
+			uchar* optr2 = reinterpret_cast<uchar*>(out.data);
+			for (int i = 0; i < numberOfPixels; i++, fptr+=ch, optr+=ch, optr2+=ch) {
+				if ((fptr[0] | fptr[1] | fptr[2]) > 0) {
+					optr[0] = fptr[0];
+					optr[1] = fptr[1];
+					optr[2] = fptr[2];
+					optr2[0] = fptr[0];
+					optr2[1] = fptr[1];
+					optr2[2] = fptr[2];
+				}
+			}
+#endif
 		}
 
 		circle(image, anglesToPx(image.rows, 235*CV_PI/180, vectorToAngles(projPos)), 10, Scalar(0, 0, 255), -1);
