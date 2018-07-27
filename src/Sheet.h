@@ -30,8 +30,8 @@ Sheet::~Sheet() {
 	if (media.isOpened())
 		media.release();
 }
-Sheet::Sheet(int a, Size2f b, float c, Point2f d, Point2f e, Point2f f, string y, bool z, int x) {
-	id = a; dim = b; mSize = c; mPos = d; tl = e; br = f;
+Sheet::Sheet(int markerID, Size2f sheetSize, float markerSize, Point2f markerTopLeft, Point2f drawingTopLeft, Point2f drawingBottomRight, string mediaFileStr, bool transpose, int framesPerProjFrame) {
+	id = markerID; dim = sheetSize; mSize = markerSize; mPos = markerTopLeft; tl = drawingTopLeft; br = drawingBottomRight;
 	tl -= mPos;
 	br -= mPos;
 	tl = tl / mSize;
@@ -39,9 +39,9 @@ Sheet::Sheet(int a, Size2f b, float c, Point2f d, Point2f e, Point2f f, string y
 	
 	updatedFrame = -99999999;
 	
-	frameSteps = x;
-	transp = z;
-	mediaFile = y;
+	frameSteps = framesPerProjFrame;
+	transp = transpose;
+	mediaFile = mediaFileStr;
 	resetMedia();
 }
 Mat Sheet::nextFrame() {
