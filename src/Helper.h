@@ -6,6 +6,7 @@
 #include "opencv2/ccalib/omnidir.hpp"
 
 using namespace std;
+using namespace cv;
 
 Mat genRotMat(Vec3d theta) {
 	// x - default axis; y - vertical axis; z - depth axis

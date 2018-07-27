@@ -12,10 +12,6 @@
 
 #include <opencv2/aruco.hpp>
 
-#include "SharedQueue.h"
-#include "SharedVideoCapture.h"
-#include "BetterBlobDetector.h"
-
 #include "Helper.h"
 #include "Sheet.h"
 

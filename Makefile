@@ -21,18 +21,12 @@ SOURCES = $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(SRCDIR)/*/*.cpp)
 HEADERS = $(wildcard $(SRCDIR)/*.h) $(wildcard $(SRCDIR)/*/*.h)
 OBJECTS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
 
-EXECUTABLE = BoardTracker
+EXECUTABLE = aruco
 TARGET = $(BINDIR)/$(EXECUTABLE)
-
-EXECUTABLE2 = aruco
-TARGET2 = $(BINDIR)/$(EXECUTABLE2)
 
 all: $(SOURCES) $(TARGET) $(TARGET2)
 
-$(TARGET): $(filter-out obj/$(EXECUTABLE2).o,$(OBJECTS)) | $(BINDIR)
-	$(CC) $(LDFLAGS) $^ -o $@
-
-$(TARGET2): $(filter-out obj/$(EXECUTABLE).o,$(OBJECTS)) | $(BINDIR)
+$(TARGET): $(OBJECTS) | $(BINDIR)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
