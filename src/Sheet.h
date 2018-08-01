@@ -14,6 +14,7 @@ public:
 	
 	string mediaFile;
 	VideoCapture media;
+	Mat frame;
 	Mat nextFrame();
 	Size getContentSize();
 	bool transp;
@@ -24,6 +25,7 @@ public:
 	Point2d projection[4];
 	Mat perspTrans;
 private:
+	Mat nextFrame(int);
 	void resetMedia();
 };
 Sheet::~Sheet() {
@@ -45,17 +47,20 @@ Sheet::Sheet(int markerID, Size2f sheetSize, float markerSize, Point2f markerTop
 	resetMedia();
 }
 Mat Sheet::nextFrame() {
-	Mat res;
-	for (int i = 0; i < frameSteps; i++)
-		media >> res;
-	while (res.empty()) {
+	return nextFrame(frameSteps);
+}
+Mat Sheet::nextFrame(int fs) {
+	for (int i = 0; i < fs; i++)
+		media.read(frame);
+	bool newFrame = fs > 0 || frame.empty();
+	while (frame.empty()) {
 		resetMedia();
-		media >> res;
+		media >> frame;
 	}
 	//flip(res, res, 1);
-	if (transp)
-		transpose(res, res);
-	return res;
+	if (newFrame && transp)
+		transpose(frame, frame);
+	return frame;
 }
 void Sheet::resetMedia() {
 	media.open(mediaFile);
@@ -63,6 +68,8 @@ void Sheet::resetMedia() {
 		cerr << "invalid input: " << mediaFile << endl;
 		exit(32);
 	}
+	if (frameSteps == 0)
+		frame = nextFrame(1);
 }
 Size Sheet::getContentSize() {
 	return Size(media.get(CAP_PROP_FRAME_WIDTH), media.get(CAP_PROP_FRAME_HEIGHT));

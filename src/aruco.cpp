@@ -46,10 +46,28 @@ int main(int argc, char **argv) {
 	// set dictionary to detect markers and setup sheets
 	Ptr<Dictionary> dictionary = getPredefinedDictionary(DICT_4X4_250);
 	vector<Sheet> sheets;
-	sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "frame.png", false, 1));
-	//sheets.push_back(Sheet(1, Size2f(29.7, 21), 8.8, Point2f(0.9, 0.9), Point2f(8.8+0.9, 8.8+0.9), Point2f(29.7, 21), "penguin.mp4", false, 2));
+	/*
+	 * Sheet(int markerID, Size2f sheetSize, float markerSize, Point2f markerTopLeft, Point2f drawingTopLeft, Point2f drawingBottomRight,
+	 * string mediaFileStr, bool transpose, int framesPerProjFrame)
+	 * markerID				- id of marker in dictionary
+	 * sheetSize			- size of total frame which includes marker
+	 * markerSize			- length of a side of a marker
+	 * markerTopLeft		- position of top left corner of marker on sheet (origin @ top left of sheet)
+	 * drawingTopLeft		- position of top left corner of drawing area
+	 * drawingBottomRight	- position of bottom right corner of drawing area
+	 * mediaFileStr			- media file to project on drawing area
+	 * transpose			- whether to transpose frame of media before porjection
+	 * framesPerProjFrame	- seek n frames for next projection
+	 * if mediaFileStr is an image, set framesPerProjFrame to 0 !!!
+	 */
+	sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "frame.png", false, 0));
 	sheets.push_back(Sheet(1, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "penguin.mp4", false, 2));
-	//sheets.push_back(Sheet(3, Size2f(29.7, 21), 4.4, Point2f(5.3, 5.3), Point2f(29.7, 21)));
+	sheets.push_back(Sheet(2, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "rabbit.mp4", true, 2));
+	sheets.push_back(Sheet(3, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "parrot.mkv", false, 2));
+	sheets.push_back(Sheet(4, Size2f(42, 60), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(42, 60), "shio.png", false, 0));
+	sheets.push_back(Sheet(5, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "john.jpg", false, 0));
+	sheets.push_back(Sheet(6, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "maeda.jpg", false, 0));
+	//sheets.push_back(Sheet(1, Size2f(29.7, 21), 8.8, Point2f(0.9, 0.9), Point2f(8.8+0.9, 8.8+0.9), Point2f(29.7, 21), "penguin.mp4", false, 2));
 	
 	// read camera parameters
 	Mat cameraMatrix, distCoeffs;
