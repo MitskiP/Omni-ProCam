@@ -61,13 +61,13 @@ int main(int argc, char **argv) {
 	 * if mediaFileStr is an image, set framesPerProjFrame to 0 !!!
 	 */
 	//sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "frame.png", false, 0));
-	sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "parrot_250fps.mkv", false, 2));
-	sheets.push_back(Sheet(1, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "penguin.mp4", false, 2));
-	sheets.push_back(Sheet(2, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "rabbit.mp4", true, 2));
-	sheets.push_back(Sheet(3, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "parrot_250fps.mkv", false, 2));
-	sheets.push_back(Sheet(4, Size2f(42, 60), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(42, 60), "shio.png", false, 0));
-	sheets.push_back(Sheet(5, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "john.jpg", false, 0));
-	sheets.push_back(Sheet(6, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "maeda.jpg", false, 0));
+	sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "res/parrot_250fps.mkv", false, 2));
+	sheets.push_back(Sheet(1, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "res/penguin_250fps.mp4", false, 2));
+	sheets.push_back(Sheet(2, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "res/rabbit_250fps.mp4", true, 2));
+	sheets.push_back(Sheet(3, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "res/parrot_250fps.mkv", false, 2));
+	sheets.push_back(Sheet(4, Size2f(42, 60), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(42, 60), "res/shio.png", false, 0));
+	sheets.push_back(Sheet(5, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "res/john.jpg", false, 0));
+	sheets.push_back(Sheet(6, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "res/maeda.jpg", false, 0));
 	//sheets.push_back(Sheet(1, Size2f(29.7, 21), 8.8, Point2f(0.9, 0.9), Point2f(8.8+0.9, 8.8+0.9), Point2f(29.7, 21), "penguin.mp4", false, 2));
 	
 	// read camera parameters
