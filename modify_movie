@@ -1,0 +1,22 @@
+#!/bin/bash
+
+target=250 # target fps
+
+for f in "$@"; do
+
+	out="${f%.*}_${target}fps.${f##*.}"
+	echo "$f --> $out"
+
+	fps="`ffmpeg -i "$f" 2>&1 | grep "Stream [^ ]* Video" | sed -e 's/ fps.*$//' -e 's/.* \([^ ]*$\)/\1/'`"
+	if ! [[ "$fps" =~ ^[0-9]*$ ]]; then
+		echo "	fps NAN"
+		continue
+	fi
+
+	fact="`bc <<< "scale=2; $fps/$target"`"
+	echo "	current fps: $fps, factor: $fact"
+
+	ffmpeg -y -i "$f" -r "$target" -filter:v "setpts=$fact*PTS" -an "$out"
+
+done
+

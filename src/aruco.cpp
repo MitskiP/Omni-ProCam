@@ -60,10 +60,11 @@ int main(int argc, char **argv) {
 	 * framesPerProjFrame	- seek n frames for next projection
 	 * if mediaFileStr is an image, set framesPerProjFrame to 0 !!!
 	 */
-	sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "frame.png", false, 0));
+	//sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "frame.png", false, 0));
+	sheets.push_back(Sheet(0, Size2f(29.7, 21), 4.4, Point2f(0.9, 0.9), Point2f(5.3, 5.3), Point2f(29.7, 21), "parrot_250fps.mkv", false, 2));
 	sheets.push_back(Sheet(1, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "penguin.mp4", false, 2));
 	sheets.push_back(Sheet(2, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "rabbit.mp4", true, 2));
-	sheets.push_back(Sheet(3, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "parrot.mkv", false, 2));
+	sheets.push_back(Sheet(3, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 8.8+0.9), Point2f(21, 29.7), "parrot_250fps.mkv", false, 2));
 	sheets.push_back(Sheet(4, Size2f(42, 60), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(42, 60), "shio.png", false, 0));
 	sheets.push_back(Sheet(5, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "john.jpg", false, 0));
 	sheets.push_back(Sheet(6, Size2f(21, 29.7), 8.8, Point2f(0.9, 0.9), Point2f(0.9, 0.9), Point2f(21, 29.7), "maeda.jpg", false, 0));
@@ -180,14 +181,20 @@ int main(int argc, char **argv) {
 					angles = vectorToAngles(vec);
 					cornersO[k][i] = anglesToPx(image.rows, 235*CV_PI/180, angles);
 
-					sheets[sheetID[k]].realWorld[i] = vec;
-					sheets[sheetID[k]].projection[i] = cornersO[k][i];
+					//sheets[sheetID[k]].realWorld[i] = vec;
+					//sheets[sheetID[k]].projection[i] = cornersO[k][i];
+					//sheets[sheetID[k]].updatedFrame = frameNo;
+
+					#define HISTORY_SIZE 3
+					sheets[sheetID[k]].realWorld[i] = (sheets[sheetID[k]].realWorld[i]*(HISTORY_SIZE-1) + vec) / HISTORY_SIZE;
+					sheets[sheetID[k]].projection[i].x = (sheets[sheetID[k]].projection[i].x*(HISTORY_SIZE-1) + cornersO[k][i].x) / HISTORY_SIZE;
+					sheets[sheetID[k]].projection[i].y = (sheets[sheetID[k]].projection[i].y*(HISTORY_SIZE-1) + cornersO[k][i].y) / HISTORY_SIZE;
 					sheets[sheetID[k]].updatedFrame = frameNo;
 				}
 
 				// calculate perspective transformation matrix for marker
-				Point2f pts3[] = { cornersO[k][0], cornersO[k][1], cornersO[k][3], cornersO[k][2] }; // target points
-				//Point2f pts3[] = { sheets[sheetID[k]].projection[0], sheets[sheetID[k]].projection[1], sheets[sheetID[k]].projection[3], sheets[sheetID[k]].projection[2] }; // target points
+				//Point2f pts3[] = { cornersO[k][0], cornersO[k][1], cornersO[k][3], cornersO[k][2] }; // target points
+				Point2f pts3[] = { sheets[sheetID[k]].projection[0], sheets[sheetID[k]].projection[1], sheets[sheetID[k]].projection[3], sheets[sheetID[k]].projection[2] }; // target points
 				Size content = sheets[sheetID[k]].getContentSize();
 				float h = content.width / (sheets[sheetID[k]].br.x - sheets[sheetID[k]].tl.x); // calculate pixels (on content) per marker size
 				float v = content.height / (sheets[sheetID[k]].br.y - sheets[sheetID[k]].tl.y);
