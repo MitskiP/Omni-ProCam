@@ -6,8 +6,8 @@ BINDIR = bin
 OBJDIR = obj
 SPHEREOBJ = $(OBJDIR)/Sphere
 
-LIBS   = `pkg-config opencv --cflags --libs` -lpthread
-CFLAGS  += -Wall -Wextra -pedantic -Wno-unused-parameter -std=c++11 -c $(LIBS)
+LIBS   = `pkg-config opencv4 --cflags --libs` -lpthread
+CFLAGS  += -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-unused-command-line-argument -std=c++11 -c $(LIBS)
 LDFLAGS += $(LIBS)
 
 ifeq ($(DEBUG),1)

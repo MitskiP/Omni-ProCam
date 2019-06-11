@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 		return -1;
 
 
-	Mat image = imread("frame1.png", CV_LOAD_IMAGE_COLOR);
+	Mat image = imread("frame1.png", IMREAD_COLOR);
 	//Point2f imgPts[] = { Point2f(0, 0), Point2f(image.cols, 0), Point2f(0, image.rows), Point2f(image.cols, image.rows) };
 	float imgDelta = 19.613f + 39.687f / 2;
 	Point2f imgPts[] = { Point2f(imgDelta, imgDelta), Point2f(image.cols-imgDelta, 0), Point2f(0, image.rows-imgDelta), Point2f(image.cols-imgDelta, image.rows-imgDelta) };
@@ -225,7 +225,7 @@ int main(int argc, char** argv) {
 		Mat crop = (*p.frame)(roi);
 
 		Mat gray; //source image
-		cvtColor(crop, gray, CV_BGR2GRAY);
+		cvtColor(crop, gray, COLOR_BGR2GRAY);
 
 		blobDetector.detect(gray, blobs);
 		vector< vector<Point> > blobContours = blobDetector.getContours();

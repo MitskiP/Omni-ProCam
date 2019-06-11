@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 	fr->setRotation(fr->genRotMat(Vec3d(CV_PI/2, 0, 0)));
 cout << "begin math" << endl;
 high_resolution_clock::time_point a1 = high_resolution_clock::now();
-//	er->invalidateMaths();
+	er->invalidateMaths();
 high_resolution_clock::time_point a2 = high_resolution_clock::now();
 cout << "elapsed " << ((duration<double, std::milli>)(a2-a1)).count() << endl;
 a1 = high_resolution_clock::now();
@@ -157,63 +157,13 @@ exit(0);
 		Mat skinframe = mt.getSkinFrame();
 		Mat components = mt.getConnectedComponentsFrame();
 
-//		shared_ptr<Mat> equi = er->getFrame();
-/*if (initvideo) {
-video = VideoWriter("outcpp.avi",CV_FOURCC('M','J','P','G'),15, Size(equi->cols, equi->rows));
-initvideo = false;
-}
-video.write(*equi);*/
 
 		//ff->updateFrame(components);
 		ff->updateFrame(*p.frame);
+		shared_ptr<Mat> equi = er->getFrame();
 		shared_ptr<Mat> fish = fr->getFrame();
 		hconcat(border, *fish, *fish);
 		hconcat(*fish, border, *fish);
-
-
-
-
-/*
-
-//Size patternsize(10,7); //number of centers
-Size patternsize(4, 11); //number of centers
-Mat gray; //source image
-cvtColor(*p.frame, gray, CV_BGR2GRAY);
-vector<Point2f> centers; //this will be filled by the detected centers
-
-SimpleBlobDetector::Params params;
-//params.maxArea = 10e4;
-//params.minArea = 10;
-//params.minDistBetweenBlobs = 5;
-//params.maxArea = 10e4;
-//params.minArea = 3;
-//params.minDistBetweenBlobs = 2;
-Ptr<FeatureDetector> blobDetector = SimpleBlobDetector::create(params);
-
-bool patternfound = findCirclesGrid(gray, patternsize, centers, CALIB_CB_ASYMMETRIC_GRID, blobDetector);
-
-
-//cout << "found: " << patternfound << endl;
-drawChessboardCorners(*p.frame, patternsize, Mat(centers), patternfound);
-
-/*
-
-		Size patternsize(10, 7); //interior number of corners
-vector<Point2f> corners; //this will be filled by the detected corners
-
-//CALIB_CB_FAST_CHECK saves a lot of time on images
-//that do not contain any chessboard corners
-bool patternfound = findChessboardCorners(gray, patternsize, corners,
-	CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE
-	+ CALIB_CB_FAST_CHECK);
-
-//if(patternfound)
-//	cornerSubPix(gray, corners, Size(11, 11), Size(-1, -1),
-//		TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
-
-drawChessboardCorners(*p.frame, patternsize, Mat(corners), patternfound);
-*/
-
 
 
 
@@ -222,13 +172,13 @@ drawChessboardCorners(*p.frame, patternsize, Mat(corners), patternfound);
 		double compression = 0.5;
 		resize(*p.frame, tmp1, Size(), compression, compression);
 		resize(components, tmp2, Size(), compression, compression);
-		resize(skinframe, tmp3, Size(), compression, compression);
+		//resize(skinframe, tmp3, Size(), compression, compression);
 		
 		imshow("orig", tmp1);
 		imshow("converted", tmp2);
 		imshow("Fullscreen ws5", *fish);
-		imshow("skin", tmp3);
-		//imshow("converted", *equi);
+		//imshow("skin", tmp3);
+		imshow("converted", *equi);
 
 
 
